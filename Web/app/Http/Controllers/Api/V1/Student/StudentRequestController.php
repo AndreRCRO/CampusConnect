@@ -26,17 +26,19 @@ class StudentRequestController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'category' => 'required|string|in:mantenimiento,soporte_tecnologico,infraestructura,equipamiento,otro',
+            'location' => 'required|string|max:255',
             'institutional_resource_id' => 'nullable|exists:institutional_resources,id',
             'priority' => 'nullable|string|in:baja,media,alta,urgente',
         ]);
 
-        $trackingCode = 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+        $trackingCode = 'REQ-'.date('Ymd').'-'.strtoupper(Str::random(6));
 
         $studentRequest = StudentRequest::create([
             'tracking_code' => $trackingCode,
             'student_id' => $request->user()->id,
             'institutional_resource_id' => $validated['institutional_resource_id'] ?? null,
             'category' => $validated['category'],
+            'location' => $validated['location'],
             'title' => $validated['title'],
             'description' => $validated['description'],
             'priority' => $validated['priority'] ?? 'media',

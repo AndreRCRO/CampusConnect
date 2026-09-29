@@ -97,12 +97,12 @@
                             🏢
                         </div>
                         <div>
-                            <div class="text-xs text-slate-400 font-semibold uppercase">Recurso Institucional Vinculado</div>
+                            <div class="text-xs text-slate-400 font-semibold uppercase">Ubicación reportada</div>
+                            <div class="text-sm font-semibold text-white">{{ $studentRequest->location ?: 'No especificada' }}</div>
                             @if($studentRequest->institutionalResource)
-                                <div class="text-sm font-semibold text-white">{{ $studentRequest->institutionalResource->name }}</div>
-                                <div class="text-xs text-cyan-400 font-mono">{{ $studentRequest->institutionalResource->code }} | {{ $studentRequest->institutionalResource->location }}</div>
+                                <div class="text-xs text-cyan-400 font-mono">{{ $studentRequest->institutionalResource->code }} | {{ $studentRequest->institutionalResource->name }}</div>
                             @else
-                                <div class="text-sm text-slate-500 italic">No especificado en el registro</div>
+                                <div class="text-xs text-slate-500 italic">Sin recurso institucional vinculado</div>
                             @endif
                         </div>
                     </div>

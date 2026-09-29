@@ -254,7 +254,7 @@ class _HomeShellState extends State<HomeShell> {
       MaterialPageRoute<void>(
         builder: (_) => RequestDetailScreen(
           repository: widget.repository,
-          requestId: request.id,
+          requestId: request.apiId,
           initialRequest: request,
         ),
       ),
@@ -356,7 +356,11 @@ class HomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = requests
-        .where((item) => item.status != RequestStatus.resolved)
+        .where(
+          (item) =>
+              item.status != RequestStatus.resolved &&
+              item.status != RequestStatus.rejected,
+        )
         .length;
     final resolved = requests
         .where((item) => item.status == RequestStatus.resolved)
@@ -1562,6 +1566,7 @@ Color _statusColor(RequestStatus status) => switch (status) {
   RequestStatus.assigned => AppColors.coral,
   RequestStatus.inProgress => AppColors.amber,
   RequestStatus.resolved => AppColors.mint,
+  RequestStatus.rejected => const Color(0xFFFFE4E0),
 };
 
 Color _statusInk(RequestStatus status) => switch (status) {
@@ -1569,6 +1574,7 @@ Color _statusInk(RequestStatus status) => switch (status) {
   RequestStatus.assigned => const Color(0xFF9A3412),
   RequestStatus.inProgress => const Color(0xFF713F12),
   RequestStatus.resolved => const Color(0xFF166534),
+  RequestStatus.rejected => const Color(0xFF8A1C13),
 };
 
 IconData _statusIcon(RequestStatus status) => switch (status) {
@@ -1576,6 +1582,7 @@ IconData _statusIcon(RequestStatus status) => switch (status) {
   RequestStatus.assigned => Icons.person_pin_circle_outlined,
   RequestStatus.inProgress => Icons.autorenew_rounded,
   RequestStatus.resolved => Icons.check_circle_outline_rounded,
+  RequestStatus.rejected => Icons.cancel_outlined,
 };
 
 String _initials(String name) {

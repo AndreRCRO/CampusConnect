@@ -41,12 +41,16 @@ class AppRepository {
 
     final response = await _send(
       () => _client.post(
-        _uri('/api/auth/login'),
+        _uri('/api/v1/auth/login'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode({'email': email, 'password': password}),
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'device_name': 'campus_connect_mobile',
+        }),
       ),
     );
     final data = _json(response);
@@ -65,7 +69,7 @@ class AppRepository {
       return List.unmodifiable(_demoRequests);
     }
     final response = await _send(
-      () => _client.get(_uri('/api/solicitudes'), headers: _headers()),
+      () => _client.get(_uri('/api/v1/student/requests'), headers: _headers()),
     );
     final decoded = jsonDecode(response.body);
     final list = decoded is List
@@ -83,11 +87,16 @@ class AppRepository {
       return _demoRequests.firstWhere((request) => request.id == id);
     }
     final response = await _send(
-      () => _client.get(_uri('/api/solicitudes/$id'), headers: _headers()),
+      () => _client.get(
+        _uri('/api/v1/student/requests/$id'),
+        headers: _headers(),
+      ),
     );
     final data = _json(response);
     return CampusRequest.fromJson(
-      (data['data'] as Map<String, dynamic>?) ?? data,
+      (data['request'] as Map<String, dynamic>?) ??
+          (data['data'] as Map<String, dynamic>?) ??
+          data,
     );
   }
 
@@ -119,28 +128,39 @@ class AppRepository {
       return request;
     }
 
-    final request = http.MultipartRequest('POST', _uri('/api/solicitudes'))
-      ..headers.addAll(_headers())
-      ..fields.addAll({
-        'titulo': input.title,
-        'categoria': input.category,
-        'ubicacion': input.location,
-        'descripcion': input.description,
-      });
-    if (input.evidencePath != null) {
-      request.files.add(
-        await http.MultipartFile.fromPath('evidencia', input.evidencePath!),
-      );
-    }
-    final streamed = await _send(request.send);
-    final response = await http.Response.fromStream(streamed);
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      _throwForStatus(response.statusCode, response.body);
-    }
-    final data = _json(response);
-    return CampusRequest.fromJson(
-      (data['data'] as Map<String, dynamic>?) ?? data,
+    final response = await _send(
+      () => _client.post(
+        _uri('/api/v1/student/requests'),
+        headers: {..._headers(), 'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'title': input.title,
+          'category': _categoryCode(input.category),
+          'location': input.location,
+          'description': input.description,
+          'priority': 'media',
+        }),
+      ),
     );
+    final data = _json(response);
+    final created = CampusRequest.fromJson(
+      (data['request'] as Map<String, dynamic>?) ?? data,
+    );
+
+    if (input.evidencePath != null) {
+      final upload = http.MultipartRequest(
+        'POST',
+        _uri('/api/v1/student/requests/${created.apiId}/media'),
+      )..headers.addAll(_headers());
+      upload.files.add(
+        await http.MultipartFile.fromPath('file', input.evidencePath!),
+      );
+      final streamed = await _send(upload.send);
+      final uploadResponse = await http.Response.fromStream(streamed);
+      if (uploadResponse.statusCode < 200 || uploadResponse.statusCode >= 300) {
+        _throwForStatus(uploadResponse.statusCode, uploadResponse.body);
+      }
+    }
+    return getRequest(created.apiId);
   }
 
   void logout() => _token = null;
@@ -207,12 +227,25 @@ class AppRepository {
   String? _messageFromBody(String body) {
     try {
       final json = jsonDecode(body) as Map<String, dynamic>;
+      final errors = json['errors'];
+      if (errors is Map && errors.isNotEmpty) {
+        final first = errors.values.first;
+        if (first is List && first.isNotEmpty) return first.first.toString();
+      }
       return json['message']?.toString() ?? json['mensaje']?.toString();
     } catch (_) {
       return null;
     }
   }
 }
+
+String _categoryCode(String category) => switch (category.toLowerCase()) {
+  'soporte tecnológico' => 'soporte_tecnologico',
+  'infraestructura' => 'infraestructura',
+  'equipamiento' => 'equipamiento',
+  'mantenimiento' => 'mantenimiento',
+  _ => 'otro',
+};
 
 List<CampusRequest> _seedRequests() {
   final now = DateTime.now();

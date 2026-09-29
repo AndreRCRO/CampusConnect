@@ -16,6 +16,7 @@ class StudentRequest extends Model
         'student_id',
         'institutional_resource_id',
         'category',
+        'location',
         'title',
         'description',
         'priority',

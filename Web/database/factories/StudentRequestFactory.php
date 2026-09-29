@@ -18,10 +18,11 @@ class StudentRequestFactory extends Factory
     public function definition(): array
     {
         return [
-            'tracking_code' => 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(6)),
+            'tracking_code' => 'REQ-'.date('Ymd').'-'.strtoupper(Str::random(6)),
             'student_id' => User::factory()->student(),
             'institutional_resource_id' => InstitutionalResource::factory(),
             'category' => fake()->randomElement(['mantenimiento', 'soporte_tecnologico', 'infraestructura', 'equipamiento', 'otro']),
+            'location' => fake()->randomElement(['Bloque A - Aula 101', 'Biblioteca', 'Laboratorio 3']),
             'title' => fake()->sentence(4),
             'description' => fake()->paragraph(),
             'priority' => fake()->randomElement(['baja', 'media', 'alta', 'urgente']),

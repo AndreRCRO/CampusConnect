@@ -19,17 +19,18 @@ flutter run
 Para consumir la API REST real:
 
 ```bash
-flutter run --dart-define=API_BASE_URL=https://api.example.edu
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
 
 ## Contrato REST esperado
 
-- `POST /api/auth/login` con `email` y `password`; devuelve `token` (o `access_token`) y `user`.
-- `GET /api/solicitudes`; devuelve una lista o `{ "data": [...] }`.
-- `GET /api/solicitudes/{id}`; devuelve la solicitud o `{ "data": {...} }`.
-- `POST /api/solicitudes` como `multipart/form-data` con `titulo`, `categoria`, `ubicacion`, `descripcion` y `evidencia`.
+- `POST /api/v1/auth/login` con `email`, `password` y `device_name`.
+- `GET /api/v1/student/requests` para listar las solicitudes del estudiante.
+- `GET /api/v1/student/requests/{id}` para detalle, comentarios y seguimiento.
+- `POST /api/v1/student/requests` para registrar título, categoría, ubicación y descripción.
+- `POST /api/v1/student/requests/{id}/media` como `multipart/form-data` para adjuntar la evidencia.
 
-El cliente acepta nombres de propiedades en español o inglés para facilitar la integración inicial. Los errores `401`, `422`, `5xx`, timeouts y fallas de conexión tienen mensajes recuperables en la interfaz.
+En Android Emulator, `10.0.2.2` apunta al equipo anfitrión. Inicia Laravel con `php artisan serve --host=0.0.0.0`. Los errores `401`, `422`, `5xx`, timeouts y fallas de conexión tienen mensajes recuperables en la interfaz.
 
 ## Verificación
 

@@ -26,6 +26,7 @@ class StudentMobileApiTest extends TestCase
             'title' => 'Falla de proyector en aula 201',
             'description' => 'El proyector no enciende al presionar el botón de encendido.',
             'category' => 'soporte_tecnologico',
+            'location' => 'Bloque B - Aula 201',
             'institutional_resource_id' => $resource->id,
             'priority' => 'media',
         ]);
@@ -33,6 +34,7 @@ class StudentMobileApiTest extends TestCase
         $response->assertStatus(201)
             ->assertJsonPath('request.title', 'Falla de proyector en aula 201')
             ->assertJsonPath('request.status', 'pendiente')
+            ->assertJsonPath('request.location', 'Bloque B - Aula 201')
             ->assertJsonPath('request.student_id', $student->id);
 
         $this->assertDatabaseHas('student_requests', [
